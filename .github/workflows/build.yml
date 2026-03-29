@@ -1,0 +1,36 @@
+name: Build WinMedia
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore src/WinMedia/WinMedia.csproj
+
+      - name: Build
+        run: dotnet build src/WinMedia/WinMedia.csproj -c Release --no-restore
+
+      - name: Publish win-x64
+        run: dotnet publish src/WinMedia/WinMedia.csproj -c Release -r win-x64 --self-contained false -o publish/win-x64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WinMedia-win-x64
+          path: publish/win-x64
